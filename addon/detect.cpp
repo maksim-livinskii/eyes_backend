@@ -11,13 +11,26 @@
 #include "./src/findEyeCenter.h"
 #include "./src/findEyeCorner.h"
 
-void process(cv::Mat& image);
+struct Eye {
+  Eye():x(0),y(0) {}
+  Eye(float d):x(d),y(d) {}
+  Eye(float x, float y) {
+    this->x = x;
+    this->y = y;
+  }
+  float x;
+  float y;
+};
 
-void findEyes(cv::Mat& image, cv::Mat frame_gray, cv::Rect face);
+bool process(cv::Mat& image, std::pair<Eye, Eye>&);
+
+std::pair<Eye, Eye> findEyes(cv::Mat& image, cv::Mat frame_gray, cv::Rect face);
 
 cv::CascadeClassifier face_cascade;
 
 void Detect(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+
+  v8::Isolate* isolate = info.GetIsolate();
 
   if (info.Length() != 1) {
     Nan::ThrowTypeError("Wrong number of arguments");
@@ -35,24 +48,31 @@ void Detect(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   // cv::imshow("img", img);
   // cv::waitKey(0);
 
-  process(img);
+  std::pair<Eye, Eye> res;
+  if (!process(img, res)) {
+    cv::transpose(img, img);
+    cv::flip(img, img, 1);
 
-  if (img.empty()) {
-    std::cerr << "img empty obj" << std::endl;
-  } else {
-    std::cerr << "img not empty" << std::endl;
+    process(img, res);
   }
 
   std::vector<uchar> buf;
   cv::imencode(".jpg", img, buf);
 
-  auto res = Nan::CopyBuffer((char*)buf.data(), buf.size()).ToLocalChecked();
+  auto image = Nan::CopyBuffer((char*)buf.data(), buf.size()).ToLocalChecked();
 
-  info.GetReturnValue().Set(res); // change buf to some new image
+  v8::Local<v8::Object> obj = v8::Object::New(isolate);
+  obj->Set(v8::String::NewFromUtf8(isolate, "lx"), v8::Number::New(isolate, res.first.x)); // left
+  obj->Set(v8::String::NewFromUtf8(isolate, "ly"), v8::Number::New(isolate, res.first.y)); // left
+  obj->Set(v8::String::NewFromUtf8(isolate, "rx"), v8::Number::New(isolate, res.second.x)); // right
+  obj->Set(v8::String::NewFromUtf8(isolate, "ry"), v8::Number::New(isolate, res.second.y)); // right
+  obj->Set(v8::String::NewFromUtf8(isolate, "image"), image);
+
+  info.GetReturnValue().Set(obj);
 
 }
 
-void process(cv::Mat& image) {
+bool process(cv::Mat& image, std::pair<Eye, Eye>& eyes) {
   std::vector<cv::Rect> faces;
 
   std::vector<cv::Mat> rgbChannels(3);
@@ -69,13 +89,17 @@ void process(cv::Mat& image) {
   createCornerKernels();
 
   if (faces.size() == 1) {
-    findEyes(image, image_gray, faces[0]);
+    eyes = findEyes(image, image_gray, faces[0]);
+  } else {
+    return false;
   }
 
   releaseCornerKernels();
+
+  return true;
 }
 
-void findEyes(cv::Mat& image, cv::Mat frame_gray, cv::Rect face) {
+std::pair<Eye, Eye> findEyes(cv::Mat& image, cv::Mat frame_gray, cv::Rect face) {
   cv::Mat faceROI = frame_gray(face);
   cv::Mat debugFace = faceROI;
 
@@ -168,18 +192,20 @@ void findEyes(cv::Mat& image, cv::Mat frame_gray, cv::Rect face) {
   // rightRightCorner.x += face.x;
   // rightRightCorner.y += face.y;
 
-  circle(image, rightPupil, 10, 1234, 10);
-  circle(image, leftPupil, 10, 1234, 10);
+  circle(image, rightPupil, 5, 1234, 5);
+  circle(image, leftPupil, 5, 1234, 5);
 
-  rectangle(image, leftRightCornerRegion, 200, 3);
-  rectangle(image, leftLeftCornerRegion, 200, 3);
-  rectangle(image, rightLeftCornerRegion, 200, 3);
-  rectangle(image, rightRightCornerRegion, 200, 3);
+  rectangle(image, leftRightCornerRegion, 200, 2);
+  rectangle(image, leftLeftCornerRegion, 200, 2);
+  rectangle(image, rightLeftCornerRegion, 200, 2);
+  rectangle(image, rightRightCornerRegion, 200, 2);
 
   // circle(image, leftRightCorner, 3, 200, 3);
   // circle(image, leftLeftCorner, 3, 200, 3);
   // circle(image, rightLeftCorner, 3, 200, 3);
   // circle(image, rightRightCorner, 3, 200, 3);
+
+  return std::make_pair(Eye(leftPupil.x, leftPupil.y), Eye(rightPupil.x, rightPupil.y));
 
 }
 

@@ -6,28 +6,46 @@ const addon = require('./addon/build/Release/detect');
 
 const app = express();
 
-app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.json({ limit: '500mb' }));
 app.use(bodyParser.urlencoded({
-  limit: '50mb',
+  limit: '500mb',
   extended: true
 }));
 
+let imageSent = false;
+
 app.post('/process', (req, res) => {
 
-  const { images } = req.body;
+  console.log('request!');
 
-  const base64Images = images.map(image => {
-    let imageBuffer = decodeBase64Image(image.body);
-    imageBuffer.data = addon.detect(imageBuffer.data);
-    return new Buffer(imageBuffer.data).toString('base64');
+  const { image } = req.body;
+
+  let imageBuffer = decodeBase64Image(image.body);
+  let obj = addon.detect(imageBuffer.data);
+  let img = imageSent ? null : new Buffer(obj.image).toString('base64');
+
+  res.send({
+    left: {
+      x: obj.lx,
+      y: obj.ly
+    },
+    right: {
+      x: obj.rx,
+      y: obj.ry
+    },
+    image: img
   });
 
-  res.send({ images: base64Images });
+  imageSent = true;
 
 });
 
 app.listen(3000, () => {
   console.log('Server started!');
+});
+
+app.on('error', (error) => {
+  console.log('Error: ', error);
 });
 
 // make nodejs package from this function

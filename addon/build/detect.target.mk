@@ -37,7 +37,7 @@ INCS_Debug := \
 	-I/app/.node-gyp/6.10.2/deps/uv/include \
 	-I/app/.node-gyp/6.10.2/deps/v8/include \
 	-I$(srcdir)/node_modules/nan \
-	-I$(srcdir)/../libs/opencv/release/include \
+	-I/app/release/include \
 	-I$(srcdir)/src
 
 DEFS_Release := \
@@ -73,7 +73,7 @@ INCS_Release := \
 	-I/app/.node-gyp/6.10.2/deps/uv/include \
 	-I/app/.node-gyp/6.10.2/deps/v8/include \
 	-I$(srcdir)/node_modules/nan \
-	-I$(srcdir)/../libs/opencv/release/include \
+	-I/app/release/include \
 	-I$(srcdir)/src
 
 OBJS := \
@@ -117,11 +117,12 @@ LDFLAGS_Release := \
 	-m64
 
 LIBS := \
-	-L ../../libs/opencv/release/lib/ \
+	-L /app/release/lib/ \
 	-lopencv_calib3d \
 	-lopencv_contrib \
 	-lopencv_core \
-	-Wl,-rpath,../../libs/opencv/release/lib
+	-lopencv_objdetect \
+	-Wl,-rpath,/app/release/lib
 
 $(obj).target/detect.node: GYP_LDFLAGS := $(LDFLAGS_$(BUILDTYPE))
 $(obj).target/detect.node: LIBS := $(LIBS)

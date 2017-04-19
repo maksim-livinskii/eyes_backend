@@ -5,7 +5,7 @@
       "sources": [ "detect.cpp", "./src/findEyeCorner.cpp", "./src/findEyeCenter.cpp", "./src/helpers.cpp"],
       "include_dirs": [
         "<!(node -e \"require('nan')\")",
-        "../libs/opencv/release/include",
+        "/app/release/include",
         "./src"
       ],
       'cflags!': ['-fno-exceptions', '-fno-rtti'],
@@ -19,12 +19,12 @@
         }]
       ],
       "libraries": [
-        "-L ../../libs/opencv/release/lib/",
+        "-L /app/release/lib/",
         "-lopencv_calib3d",
         "-lopencv_contrib",
         "-lopencv_core",
         "-lopencv_objdetect",
-        "-Wl,-rpath,../../libs/opencv/release/lib"
+        "-Wl,-rpath,/app/release/lib"
       ]
     }
   ]

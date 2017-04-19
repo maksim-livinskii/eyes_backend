@@ -1,6 +1,6 @@
 # Package Information for pkg-config
 
-prefix=/app/libs/opencv/release
+prefix=/app/release
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir_old=${prefix}/include/opencv

@@ -23,6 +23,7 @@
         "-lopencv_calib3d",
         "-lopencv_contrib",
         "-lopencv_core",
+        "-lopencv_objdetect",
         "-Wl,-rpath,../../libs/opencv/release/lib"
       ]
     }

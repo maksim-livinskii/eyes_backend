@@ -14,6 +14,10 @@ app.use(bodyParser.urlencoded({
 
 let imageSent = false;
 
+app.get('/', (req, res) => {
+  res.send('It works');
+});
+
 app.post('/process', (req, res) => {
 
   console.log('request!');

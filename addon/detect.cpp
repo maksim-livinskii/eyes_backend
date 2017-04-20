@@ -48,13 +48,12 @@ void Detect(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   // cv::imshow("img", img);
   // cv::waitKey(0);
 
-  std::pair<Eye, Eye> res;
-  if (!process(img, res)) {
-    cv::transpose(img, img);
-    cv::flip(img, img, 1);
+  cv::transpose(img, img);
+  cv::flip(img, img, 1);
 
-    process(img, res);
-  }
+  std::pair<Eye, Eye> res;
+
+  process(img, res);
 
   std::vector<uchar> buf;
   cv::imencode(".jpg", img, buf);

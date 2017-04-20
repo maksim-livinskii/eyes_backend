@@ -22,7 +22,7 @@ app.post('/process', (req, res) => {
 
   console.log('request!');
 
-  const { image } = req.body;
+  const { image, isLast } = req.body;
 
   let imageBuffer = decodeBase64Image(image.body);
   let obj = addon.detect(imageBuffer.data);
@@ -40,7 +40,11 @@ app.post('/process', (req, res) => {
     image: img
   });
 
-  imageSent = true;
+  if (isLast) {
+    imageSent = false;
+  } else {
+    imageSent = true;
+  }
 
 });
 

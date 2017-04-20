@@ -48,8 +48,10 @@ void Detect(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   // cv::imshow("img", img);
   // cv::waitKey(0);
 
-  cv::transpose(img, img);
-  cv::flip(img, img, 1);
+  if (img.rows < img.cols) {
+    cv::transpose(img, img);
+    cv::flip(img, img, 1);
+  }
 
   std::pair<Eye, Eye> res;
 

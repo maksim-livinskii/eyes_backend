@@ -26,7 +26,8 @@ app.post('/process', (req, res) => {
 
   let imageBuffer = decodeBase64Image(image.body);
   let obj = addon.detect(imageBuffer.data);
-  let img = imageSent ? null : new Buffer(obj.image).toString('base64');
+  // let img = imageSent ? null : new Buffer(obj.image).toString('base64');
+  let img = new Buffer(obj.image).toString('base64');
 
   res.send({
     left: {

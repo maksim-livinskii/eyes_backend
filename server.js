@@ -18,16 +18,18 @@ app.get('/', (req, res) => {
   res.send('It works');
 });
 
+let clients = {};
+
 app.post('/process', (req, res) => {
 
-  console.log('request!');
+  const { image, clientId } = req.body;
 
-  const { image, isLast } = req.body;
+  console.log('clientId: ', clientId);
 
   let imageBuffer = decodeBase64Image(image.body);
   let obj = addon.detect(imageBuffer.data);
-  // let img = imageSent ? null : new Buffer(obj.image).toString('base64');
-  let img = new Buffer(obj.image).toString('base64');
+  let img = clients[clientId] ? null : new Buffer(obj.image).toString('base64');
+  // let img = new Buffer(obj.image).toString('base64');
 
   res.send({
     left: {
@@ -41,11 +43,7 @@ app.post('/process', (req, res) => {
     image: img
   });
 
-  if (isLast) {
-    imageSent = false;
-  } else {
-    imageSent = true;
-  }
+  clients[clientId] = true;
 
 });
 
